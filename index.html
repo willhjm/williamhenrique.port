@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Portfólio de William Henrique Jesus Melo — estudante de Análise e Desenvolvimento de Sistemas. Projetos em Python 3 executáveis direto no navegador.">
+<title>William Henrique — Portfólio</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/monokai.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/python.min.js"></script>
+
+<style>
+  :root{
+    --bg:#0b0f17;
+    --bg-2:#0d1320;
+    --surface:#141c2b;
+    --surface-2:#101724;
+    --border:rgba(148,163,184,.16);
+    --border-strong:rgba(148,163,184,.30);
+    --text:#e8edf5;
+    --muted:#8d9bb3;
+    --accent:#7c5cff;
+    --accent-soft:rgba(124,92,255,.14);
+    --accent-2:#19c7a2;
+    --accent-2-soft:rgba(25,199,162,.14);
+    --accent-3:#ffb454;
+    --danger:#ff7b8a;
+    --radius:16px;
+    --radius-sm:10px;
+    --sidebar-w:272px;
+    --shadow:0 20px 50px rgba(0,0,0,.35);
+    --font-display:'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-body:'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    min-width:320px;
+    color:var(--text);
+    background:
+      radial-gradient(circle at 12% -8%, rgba(124,92,255,.16), transparent 38rem),
+      radial-gradient(circle at 100% 0%, rgba(25,199,162,.08), transparent 30rem),
+      var(--bg);
+    font-family:var(--font-body);
+    line-height:1.6;
+  }
+  a{color:#b9aaff;}
+  button{font:inherit;}
+  ::selection{background:var(--accent-soft); color:#fff;}
+  :focus-visible{outline:2px solid var(--accent-2); outline-offset:3px; border-radius:4px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;}
+  }
+
+  /* ---------- App shell ---------- */
+  .app{display:flex; min-height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w);
+    display:flex; flex-direction:column;
+    background:linear-gradient(180deg, var(--bg-2), #090d15);
+    border-right:1px solid var(--border);
+    padding:28px 20px;
+    z-index:40;
+    transition:transform .28s ease;
+  }
+  .brand{display:flex; align-items:center; gap:13px; margin-bottom:26px; text-decoration:none;}
+  .avatar{
+    position:relative; width:64px; height:64px; border-radius:20px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(145deg, rgba(124,92,255,.22), rgba(25,199,162,.12));
+    border:1.5px dashed var(--border-strong);
+    color:#c9bfff; overflow:hidden;
+  }
+  .avatar img{width:100%; height:100%; object-fit:cover; border-radius:18px;}
+  .avatar svg{width:28px; height:28px; opacity:.85;}
+  .brand-text{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .brand-name{font-family:var(--font-display); font-weight:700; font-size:1.02rem; letter-spacing:-.01em; color:#fff; line-height:1.2;}
+  .brand-role{font-size:.74rem; color:var(--muted); font-weight:500;}
+
+  .runtime-pill{
+    display:flex; align-items:center; gap:8px; margin-bottom:22px;
+    padding:8px 12px; border:1px solid var(--border); border-radius:999px;
+    color:var(--muted); font-size:.72rem; background:rgba(255,255,255,.02);
+  }
+  .status-dot{width:7px; height:7px; border-radius:50%; background:var(--accent-3); flex:none; box-shadow:0 0 0 4px rgba(255,180,84,.10);}
+  .status-dot.ready{background:var(--accent-2); box-shadow:0 0 0 4px rgba(25,199,162,.10);}
+  .status-dot.loading{background:var(--accent); box-shadow:0 0 0 4px rgba(124,92,255,.18); animation:pulse 1.2s infinite;}
+  .status-dot.error{background:var(--danger); box-shadow:0 0 0 4px rgba(255,123,138,.10);}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+  .nav{display:flex; flex-direction:column; gap:3px; flex:1;}
+  .nav-item{
+    display:flex; align-items:center; gap:12px;
+    padding:11px 13px; border-radius:11px; border:1px solid transparent;
+    color:var(--muted); text-decoration:none; cursor:pointer;
+    font-size:.89rem; font-weight:600; letter-spacing:-.005em;
+    background:transparent; text-align:left; width:100%;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .nav-item svg{width:17px; height:17px; flex:none; opacity:.85;}
+  .nav-item:hover{background:rgba(255,255,255,.04); color:var(--text);}
+  .nav-item.active{background:var(--accent-soft); color:#fff; border-color:rgba(124,92,255,.35);}
+  .nav-index{font-family:var(--font-mono); font-size:.68rem; color:#59647c; margin-left:auto;}
+  .nav-item.active .nav-index{color:#c9bfff;}
+
+  .sidebar-footer{margin-top:18px; padding-top:16px; border-top:1px solid var(--border);}
+  .sidebar-links{display:flex; gap:8px;}
+  .icon-link{
+    display:flex; align-items:center; justify-content:center; width:34px; height:34px;
+    border-radius:9px; border:1px solid var(--border); color:var(--muted);
+    text-decoration:none; transition:border-color .15s, color .15s;
+  }
+  .icon-link:hover{border-color:var(--accent); color:#fff;}
+  .icon-link svg{width:16px; height:16px;}
+
+  .nav-toggle{
+    display:none; position:fixed; top:16px; right:16px; z-index:50;
+    width:44px; height:44px; border-radius:12px; border:1px solid var(--border);
+    background:var(--surface); color:var(--text); cursor:pointer;
+    align-items:center; justify-content:center;
+  }
+  .nav-toggle svg{width:20px; height:20px;}
+  .sidebar-scrim{display:none; position:fixed; inset:0; background:rgba(5,7,12,.6); z-index:35;}
+
+  /* ---------- Main content ---------- */
+  .main{margin-left:var(--sidebar-w); flex:1; min-width:0;}
+  .page{display:none; width:min(980px, calc(100% - 64px)); margin:0 auto; padding:56px 0 90px;}
+  .page.active{display:block; animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .eyebrow{display:inline-flex; align-items:center; gap:9px; margin:0 0 16px; color:#b9aaff; font-size:.75rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;}
+  .eyebrow::before{content:""; width:24px; height:1px; background:var(--accent);}
+  h1,h2,h3,h4,p{margin-top:0; font-family:var(--font-display); letter-spacing:-.02em;}
+  p, li{font-family:var(--font-body); letter-spacing:0;}
+
+  /* ---- Início / hero ---- */
+  .hero-name{font-size:clamp(2.4rem, 5.4vw, 4.2rem); line-height:1.03; margin-bottom:14px; font-weight:700;}
+  .hero-name span{color:#a996ff;}
+  .hero-tagline{max-width:640px; color:var(--text); font-size:1.12rem; font-weight:600; margin-bottom:12px; font-family:var(--font-body);}
+  .hero-copy{max-width:620px; color:var(--muted); font-size:1.02rem; margin-bottom:26px; font-family:var(--font-body);}
+  .hero-actions{display:flex; flex-wrap:wrap; gap:12px; margin-bottom:40px;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; padding:11px 18px; border-radius:11px;
+    font-weight:700; font-size:.88rem; text-decoration:none; cursor:pointer; border:1px solid transparent;
+    transition:transform .15s, border-color .15s, background .15s;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{color:#fff; background:linear-gradient(135deg, var(--accent), #5c43cd); box-shadow:0 10px 24px rgba(124,92,255,.22);}
+  .btn-ghost{color:var(--text); border-color:var(--border); background:rgba(255,255,255,.02);}
+  .btn-ghost:hover{border-color:var(--accent);}
+  .pill-row{display:flex; flex-wrap:wrap; gap:9px; margin-bottom:44px;}
+  .pill{padding:7px 13px; border:1px solid var(--border); border-radius:999px; color:#becbda; background:rgba(21,27,37,.6); font-size:.79rem; font-family:var(--font-mono);}
+
+  .hero-demo-label{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .hero-demo-label h3{font-size:.95rem; color:var(--text); font-weight:700;}
+  .hero-demo-label span{color:var(--muted); font-size:.78rem; font-family:var(--font-body);}
+
+  /* ---- Sections generic ---- */
+  .section-heading{margin-bottom:26px;}
+  .section-heading h2{font-size:clamp(1.5rem, 3vw, 2rem); margin-bottom:6px;}
+  .section-heading p{color:var(--muted); font-size:.95rem; font-family:var(--font-body); max-width:620px;}
+
+  .panel{
+    padding:26px; border:1px solid var(--border); border-radius:var(--radius);
+    background:linear-gradient(155deg, rgba(29,38,54,.7), rgba(15,20,29,.7));
+    box-shadow:var(--shadow);
+  }
+  .prose p{color:#c4cddc; font-size:1rem; margin-bottom:14px; font-family:var(--font-body);}
+  .prose p:last-child{margin-bottom:0;}
+
+  /* ---- Qualificações ---- */
+  .qual-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:18px;}
+  .qual-card{padding:22px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface);}
+  .qual-card h3{display:flex; align-items:center; gap:9px; font-size:1.02rem; margin-bottom:14px; color:#fff;}
+  .qual-card h3 svg{width:18px; height:18px; color:var(--accent-2); flex:none;}
+  .timeline{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:14px;}
+  .timeline li{position:relative; padding-left:18px; border-left:2px solid var(--border);}
+  .timeline li::before{content:""; position:absolute; left:-5px; top:4px; width:8px; height:8px; border-radius:50%; background:var(--accent-2);}
+  .timeline .t-title{font-weight:700; color:var(--text); font-size:.92rem; font-family:var(--font-body);}
+  .timeline .t-meta{color:var(--muted); font-size:.78rem; margin-top:2px; font-family:var(--font-body);}
+  .tag-cloud{display:flex; flex-wrap:wrap; gap:8px;}
+  .tag{padding:6px 11px; border-radius:8px; background:var(--accent-2-soft); color:#a6f2df; font-size:.78rem; font-weight:600; font-family:var(--font-mono);}
+  .qual-full{grid-column:1 / -1;}
+  @media (max-width:760px){.qual-grid{grid-template-columns:1fr;}}
+
+  /* ---- Projetos / accordion ---- */
+  .accordion{display:flex; flex-direction:column; gap:12px;}
+  .acc-item{border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); overflow:hidden;}
+  .acc-item[open-state="true"]{border-color:rgba(124,92,255,.4);}
+  .acc-head{
+    display:flex; align-items:center; gap:14px; width:100%; padding:16px 18px;
+    background:transparent; border:none; color:var(--text); cursor:pointer; text-align:left;
+  }
+  .acc-index{font-family:var(--font-mono); font-size:.72rem; color:var(--accent-2); font-weight:700; letter-spacing:.06em; flex:none; width:46px;}
+  .acc-title-wrap{flex:1; min-width:0;}
+  .acc-title{font-family:var(--font-display); font-weight:700; font-size:.98rem; color:#fff;}
+  .acc-desc{color:var(--muted); font-size:.82rem; margin-top:2px; font-family:var(--font-body);}
+  .acc-chevron{flex:none; width:18px; height:18px; color:var(--muted); transition:transform .2s;}
+  .acc-item[open-state="true"] .acc-chevron{transform:rotate(180deg); color:var(--accent-2);}
+  .acc-body{max-height:0; overflow:hidden; transition:max-height .3s ease;}
+  .acc-body-inner{padding:0 18px 20px;}
+
+  .code-shell{position:relative; overflow:hidden; margin-bottom:14px; border:1px solid rgba(255,255,255,.1); border-radius:12px; background:#1e1e1e;}
+  .code-label{display:block; padding:8px 13px; border-bottom:1px solid rgba(255,255,255,.08); color:#78879b; font-family:var(--font-mono); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase;}
+  pre{overflow-x:auto; margin:0; padding:14px;}
+  pre code{display:block; min-width:max-content; font-family:var(--font-mono); font-size:.8rem; line-height:1.6;}
+  .input-label{display:flex; justify-content:space-between; gap:10px; margin:0 0 6px; color:#d7e1ec; font-size:.82rem; font-weight:700; font-family:var(--font-body);}
+  .input-help{margin:0 0 8px; color:var(--muted); font-size:.76rem; font-family:var(--font-body);}
+  .input-area{width:100%; min-height:64px; resize:vertical; padding:10px 12px; border:1px solid var(--border); border-radius:10px; outline:none; color:var(--text); background:#0f151f; font-family:var(--font-mono); font-size:.82rem; line-height:1.55;}
+  .input-area:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(124,92,255,.15);}
+  .card-actions{display:flex; align-items:center; gap:10px; margin-top:13px;}
+  .run-button,.clear-button{cursor:pointer; border-radius:10px; font-weight:800; transition:transform .18s, border-color .18s, opacity .18s;}
+  .run-button{flex:1; padding:10px 16px; border:1px solid transparent; color:#fff; background:linear-gradient(135deg, var(--accent), #5c43cd); box-shadow:0 8px 18px rgba(124,92,255,.18);}
+  .clear-button{padding:10px 13px; border:1px solid var(--border); color:var(--muted); background:transparent; font-size:.78rem;}
+  .run-button:hover:not(:disabled), .clear-button:hover{transform:translateY(-1px);}
+  .run-button:disabled{cursor:wait; opacity:.55;}
+  .output-wrap{margin-top:14px;}
+  .output-label{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; color:#d7e1ec; font-size:.74rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; font-family:var(--font-body);}
+  .output{overflow:auto; min-height:60px; max-height:260px; margin:0; padding:11px; border:1px solid rgba(25,199,162,.22); border-radius:10px; color:#b8f7e8; background:#0c1918; font-family:var(--font-mono); font-size:.78rem; line-height:1.55; white-space:pre-wrap; word-break:break-word;}
+  .output.placeholder{color:#66827d;}
+  .output.error{border-color:rgba(255,123,138,.32); color:#ffc0c8; background:#21151b;}
+
+  /* ---- Moto Clube ---- */
+  .moto-panel{display:flex; flex-direction:column; gap:20px;}
+  .moto-badges{display:flex; flex-wrap:wrap; gap:10px; margin-top:6px;}
+  .insta-btn{
+    display:inline-flex; align-items:center; gap:10px; padding:12px 18px; border-radius:12px;
+    border:1px solid var(--border); text-decoration:none; color:#fff; font-weight:700; font-size:.88rem;
+    background:linear-gradient(135deg, rgba(124,92,255,.18), rgba(255,120,90,.12));
+    transition:transform .15s, border-color .15s;
+  }
+  .insta-btn:hover{transform:translateY(-1px); border-color:var(--accent);}
+  .insta-btn svg{width:18px; height:18px;}
+  .cause-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; margin-top:6px;}
+  .cause-card{padding:16px; border:1px solid var(--border); border-radius:12px; background:var(--surface);}
+  .cause-card h4{font-size:.9rem; color:#fff; margin-bottom:5px; font-family:var(--font-body); font-weight:700;}
+  .cause-card p{font-size:.83rem; color:var(--muted); margin:0; font-family:var(--font-body);}
+  @media (max-width:600px){.cause-grid{grid-template-columns:1fr;}}
+
+  /* ---- Contato ---- */
+  .contact-grid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px;}
+  .contact-card{
+    display:flex; flex-direction:column; gap:10px; padding:20px; border:1px solid var(--border);
+    border-radius:var(--radius); background:var(--surface); text-decoration:none; color:var(--text);
+    transition:border-color .15s, transform .15s;
+  }
+  .contact-card:hover{border-color:var(--accent); transform:translateY(-2px);}
+  .contact-card svg{width:22px; height:22px; color:var(--accent-2);}
+  .contact-card .c-label{font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-family:var(--font-body); font-weight:700;}
+  .contact-card .c-value{font-size:.88rem; font-weight:600; word-break:break-word; font-family:var(--font-body);}
+  @media (max-width:760px){.contact-grid{grid-template-columns:1fr;}}
+
+  footer.page-footer{border-top:1px solid var(--border); margin-top:50px; padding-top:20px; color:#5f6c82; font-size:.78rem; font-family:var(--font-body);}
+
+  /* ---------- Responsive shell ---------- */
+  @media (max-width:920px){
+    .sidebar{transform:translateX(-100%);}
+    .sidebar.open{transform:translateX(0);}
+    .main{margin-left:0;}
+    .nav-toggle{display:flex;}
+    .sidebar.open ~ .sidebar-scrim{display:block;}
+    .page{width:calc(100% - 40px); padding:76px 0 70px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <button class="nav-toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+
+  <aside class="sidebar" id="sidebar">
+    <a href="#" class="brand" data-nav="inicio">
+      <span class="avatar" id="avatarSlot">
+        <!-- FOTO: quando tiver a foto profissional, troque este bloco por:
+             <img src="images/foto-william.jpg" alt="Foto de William Henrique"> -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">William Henrique</span>
+        <span class="brand-role">Estudante de ADS</span>
+      </span>
+    </a>
+
+    <div class="runtime-pill">
+      <span class="status-dot" id="statusDot" aria-hidden="true"></span>
+      <span id="runtimeStatus">Python pronto para executar</span>
+    </div>
+
+    <nav class="nav" aria-label="Navegação principal">
+      <button class="nav-item active" data-nav="inicio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        Início
+      </button>
+      <button class="nav-item" data-nav="sobre">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        Sobre mim
+      </button>
+      <button class="nav-item" data-nav="qualificacoes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 4.5-9 4.5-9-4.5L12 3z"/><path d="M7 11.5V16c0 1.7 2.2 3 5 3s5-1.3 5-3v-4.5"/></svg>
+        Qualificações
+      </button>
+      <button class="nav-item" data-nav="projetos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l-3 3 3 3"/><path d="M16 9l3 3-3 3"/><path d="M13 6l-2 12"/></svg>
+        Projetos Python 3
+        <span class="nav-index">21</span>
+      </button>
+      <button class="nav-item" data-nav="motoclube">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M9 17h6l-2-8H8.5L6 12"/><path d="M13 9h4l2 4"/></svg>
+        Moto Clube Dragões
+      </button>
+      <button class="nav-item" data-nav="contato">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/></svg>
+        Contato
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-links">
+        <a class="icon-link" href="https://github.com/willhjm" target="_blank" rel="noopener" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.9 5.3.9 11.6c0 5 3.3 9.3 7.8 10.8.6.1.8-.3.8-.6v-2.2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.4 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.5-1.5 7.8-5.8 7.8-10.8C23.1 5.3 18.3.5 12 .5z"/></svg>
+        </a>
+        <a class="icon-link" href="https://www.linkedin.com/in/william-henrique-jesus-de-melo-5035b4391/" target="_blank" rel="noopener" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.9 3.9 6 2.5 6S0 4.9 0 3.5 1.1 1 2.5 1s2.48 1.1 2.48 2.5zM.5 8h4V23h-4V8zm7.5 0h3.8v2.05h.05c.53-1 1.83-2.05 3.77-2.05C19.9 8 21 10.2 21 13.6V23h-4v-8.4c0-2-.04-4.5-2.75-4.5-2.75 0-3.17 2.15-3.17 4.35V23h-4V8z"/></svg>
+        </a>
+        <a class="icon-link" href="mailto:will.henrique.j.m@gmail.com" aria-label="E-mail">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/></svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
+
+  <main class="main">
+
+    <!-- ===================== INÍCIO ===================== -->
+    <section class="page active hero" id="page-inicio">
+      <p class="eyebrow">Portfólio · Análise e Desenvolvimento de Sistemas</p>
+      <h1 class="hero-name">William Henrique <span>Jesus Melo</span></h1>
+      <p class="hero-tagline">Estudante de Análise e Desenvolvimento de Sistemas — código que roda direto no seu navegador.</p>
+      <p class="hero-copy">Apaixonado por resolver problemas com Python. Este portfólio não é só uma vitrine: cada projeto abaixo executa de verdade, aqui mesmo, sem instalar nada.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" data-nav="projetos">Ver projetos Python 3</button>
+        <button class="btn btn-ghost" data-nav="contato">Falar comigo</button>
+      </div>
+      <div class="pill-row">
+        <span class="pill">Python 3</span>
+        <span class="pill">JavaScript</span>
+        <span class="pill">C++</span>
+        <span class="pill">Pyodide · WebAssembly</span>
+      </div>
+
+      <div class="panel">
+        <div class="hero-demo-label">
+          <h3>Experimente agora — Sequência de Fibonacci</h3>
+          <span>clique em executar</span>
+        </div>
+        <div id="heroDemo"></div>
+      </div>
+
+      <footer class="page-footer">&copy; 2026 William Henrique Jesus Melo — Suzano, SP</footer>
+    </section>
+
+    <!-- ===================== SOBRE MIM ===================== -->
+    <section class="page" id="page-sobre">
+      <div class="section-heading">
+        <p class="eyebrow">Sobre mim</p>
+        <h2>Da manutenção elétrica ao desenvolvimento de sistemas</h2>
+      </div>
+      <div class="panel prose">
+        <p>Sou autodidata por natureza e movido por aprender fazendo. Antes de entrar na área de tecnologia, construí experiência prática no operacional — como eletricista, operador de caldeira e auxiliar de manutenção — e é esse olhar de quem resolve problemas reais no dia a dia que trago agora para o desenvolvimento de sistemas.</p>
+        <p>Atualmente curso Análise e Desenvolvimento de Sistemas na Anhanguera, em Suzano-SP, e venho me dedicando ao estudo de Python 3, lógica de programação e desenvolvimento web. Gosto de projetos que eu possa testar, quebrar e entender de ponta a ponta — por isso este portfólio foi pensado para que qualquer código que eu escrevi possa ser executado e conferido na hora, sem precisar confiar apenas na leitura.</p>
+        <p>Fora do trabalho e dos estudos, sou pró-ativo em ações sociais na região do Alto Tietê como membro do Moto Clube Dragões — você confere mais sobre isso na aba ao lado.</p>
+      </div>
+    </section>
+
+    <!-- ===================== QUALIFICAÇÕES ===================== -->
+    <section class="page" id="page-qualificacoes">
+      <div class="section-heading">
+        <p class="eyebrow">Formação e experiência</p>
+        <h2>Qualificações</h2>
+        <p>Formação acadêmica, experiência profissional, certificações e conhecimentos técnicos.</p>
+      </div>
+
+      <div class="qual-grid">
+        <div class="qual-card">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 4.5-9 4.5-9-4.5L12 3z"/><path d="M7 11.5V16c0 1.7 2.2 3 5 3s5-1.3 5-3v-4.5"/></svg>Formação</h3>
+          <ul class="timeline">
+            <li><div class="t-title">Análise e Desenvolvimento de Sistemas</div><div class="t-meta">Anhanguera · Suzano-SP · Cursando</div></li>
+            <li><div class="t-title">Eletricista Instalador</div><div class="t-meta">Senai · Suzano-SP · 2019</div></li>
+            <li><div class="t-title">Inglês Avançado (Fluente)</div><div class="t-meta">U.S.A International · Suzano-SP</div></li>
+          </ul>
+        </div>
+
+        <div class="qual-card">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>Experiência profissional</h3>
+          <ul class="timeline">
+            <li><div class="t-title">Auxiliar de Manutenção / Operador de Caldeira</div><div class="t-meta">Aqualav Serviços de Higienização · 08/2020 – atual</div></li>
+            <li><div class="t-title">Eletricista</div><div class="t-meta">HR Elétrica · 04/2018 – 05/2020</div></li>
+            <li><div class="t-title">Agente de Telecomunicações</div><div class="t-meta">Teleperformance · 11/2014 – 03/2016</div></li>
+          </ul>
+        </div>
+
+        <div class="qual-card">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.8 5.5 21l2-7.5L2 9h7z"/></svg>Certificações</h3>
+          <div class="tag-cloud">
+            <span class="tag">NR-10 · Segurança em instalações elétricas (2022)</span>
+            <span class="tag">NR-35 · Trabalho em altura (2020)</span>
+            <span class="tag">NR-13 · Caldeiras e vasos de pressão (2022)</span>
+          </div>
+        </div>
+
+        <div class="qual-card">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/></svg>Conhecimentos técnicos</h3>
+          <div class="tag-cloud">
+            <span class="tag">Python 3</span>
+            <span class="tag">JavaScript</span>
+            <span class="tag">C++</span>
+            <span class="tag">AutoCAD 2D</span>
+            <span class="tag">SolidWorks</span>
+            <span class="tag">Pacote Office</span>
+            <span class="tag">Desenho Técnico Mecânico</span>
+          </div>
+        </div>
+
+        <div class="qual-card qual-full">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20l9-16H3l9 16z"/></svg>Perfil</h3>
+          <div class="tag-cloud">
+            <span class="tag">Autodidata</span>
+            <span class="tag">Proatividade</span>
+            <span class="tag">Adaptabilidade</span>
+            <span class="tag">Trabalho em equipe</span>
+            <span class="tag">Foco em performance</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PROJETOS PYTHON ===================== -->
+    <section class="page" id="page-projetos">
+      <div class="section-heading">
+        <p class="eyebrow">Projetos · Python 3</p>
+        <h2>21 exercícios e projetos executáveis</h2>
+        <p>Clique em um projeto para abrir. Leia o código, ajuste as entradas se quiser e clique em Executar — o resultado roda de verdade no seu navegador, via Pyodide (CPython 3.12 em WebAssembly). Abrir um projeto fecha o anterior automaticamente.</p>
+      </div>
+      <div class="accordion" id="accordion"></div>
+    </section>
+
+    <!-- ===================== MOTO CLUBE DRAGÕES ===================== -->
+    <section class="page" id="page-motoclube">
+      <div class="section-heading">
+        <p class="eyebrow">Fora do código</p>
+        <h2>Moto Clube Dragões</h2>
+      </div>
+      <div class="panel moto-panel">
+        <p style="color:#c4cddc; font-family:var(--font-body); font-size:1rem;">Sou membro do Moto Clube Dragões e uso parte do meu tempo livre em ações sociais pela região do Alto Tietê. É uma parte da minha rotina que anda junto com o resto — a mesma vontade de contribuir que trago para o trabalho e para os estudos.</p>
+
+        <div class="cause-grid">
+          <div class="cause-card">
+            <h4>Arrecadação de livros</h4>
+            <p>Ação em parceria com a Associação AAMAE.</p>
+          </div>
+          <div class="cause-card">
+            <h4>Pedágio Solidário</h4>
+            <p>Arrecadação de alimentos para instituições que auxiliam pessoas em situação de vulnerabilidade.</p>
+          </div>
+        </div>
+
+        <div class="moto-badges">
+          <a class="insta-btn" href="https://www.instagram.com/dragoesmcbrasil/" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+            @dragoesmcbrasil
+          </a>
+          <a class="insta-btn" href="https://www.instagram.com/associacao.dragoesmc/" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+            @associacao.dragoesmc
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONTATO ===================== -->
+    <section class="page" id="page-contato">
+      <div class="section-heading">
+        <p class="eyebrow">Vamos conversar</p>
+        <h2>Contato</h2>
+        <p>Aberto a oportunidades e conversas sobre projetos, estágio ou tecnologia em geral.</p>
+      </div>
+      <div class="contact-grid">
+        <a class="contact-card" href="mailto:will.henrique.j.m@gmail.com">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/></svg>
+          <span class="c-label">E-mail</span>
+          <span class="c-value">will.henrique.j.m@gmail.com</span>
+        </a>
+        <a class="contact-card" href="https://www.linkedin.com/in/william-henrique-jesus-de-melo-5035b4391/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.9 3.9 6 2.5 6S0 4.9 0 3.5 1.1 1 2.5 1s2.48 1.1 2.48 2.5zM.5 8h4V23h-4V8zm7.5 0h3.8v2.05h.05c.53-1 1.83-2.05 3.77-2.05C19.9 8 21 10.2 21 13.6V23h-4v-8.4c0-2-.04-4.5-2.75-4.5-2.75 0-3.17 2.15-3.17 4.35V23h-4V8z"/></svg>
+          <span class="c-label">LinkedIn</span>
+          <span class="c-value">/in/william-henrique-jesus-de-melo</span>
+        </a>
+        <a class="contact-card" href="https://github.com/willhjm" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.9 5.3.9 11.6c0 5 3.3 9.3 7.8 10.8.6.1.8-.3.8-.6v-2.2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.4 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.5-1.5 7.8-5.8 7.8-10.8C23.1 5.3 18.3.5 12 .5z"/></svg>
+          <span class="c-label">GitHub</span>
+          <span class="c-value">github.com/willhjm</span>
+        </a>
+      </div>
+      <footer class="page-footer">&copy; 2026 William Henrique Jesus Melo — Suzano, SP</footer>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js"></script>
+<script>
+/* ============================================================
+   NAVEGAÇÃO (troca de "páginas" pelo menu lateral)
+   ============================================================ */
+(function(){
+  var navItems = document.querySelectorAll('[data-nav]');
+  var pages = document.querySelectorAll('.page');
+  var sidebar = document.getElementById('sidebar');
+  var navToggle = document.getElementById('navToggle');
+  var scrim = document.getElementById('sidebarScrim');
+
+  function goTo(target){
+    pages.forEach(function(p){ p.classList.toggle('active', p.id === 'page-' + target); });
+    document.querySelectorAll('.nav-item').forEach(function(b){
+      b.classList.toggle('active', b.dataset.nav === target);
+    });
+    sidebar.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    document.querySelector('.main').scrollTo({top:0, behavior:'instant'});
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+
+  navItems.forEach(function(el){
+    el.addEventListener('click', function(e){
+      e.preventDefault();
+      goTo(el.dataset.nav);
+    });
+  });
+
+  navToggle.addEventListener('click', function(){
+    var open = sidebar.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', String(open));
+  });
+  scrim.addEventListener('click', function(){
+    sidebar.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+  });
+})();
+
+/* ============================================================
+   MOTOR PYTHON (Pyodide) — compartilhado por todos os cards
+   ============================================================ */
+var pyodide = null;
+var pyodideLoading = null;
+var statusText = document.getElementById('runtimeStatus');
+var statusDot = document.getElementById('statusDot');
+
+function setRuntimeStatus(message, state){
+  statusText.textContent = message;
+  statusDot.className = 'status-dot' + (state ? ' ' + state : '');
+}
+
+function escapeHtml(value){
+  return value.replace(/[&<>'"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];
+  });
+}
+
+async function ensurePyodide(){
+  if (pyodideLoading) return pyodideLoading;
+  if (pyodide) return pyodide;
+  pyodideLoading = (async function(){
+    setRuntimeStatus('Carregando Python no navegador (1ª vez)...', 'loading');
+    if (typeof loadPyodide === 'undefined'){
+      for (var i = 0; i < 60; i++){
+        if (typeof loadPyodide !== 'undefined') break;
+        await new Promise(function(r){ setTimeout(r, 500); });
+      }
+      if (typeof loadPyodide === 'undefined'){
+        throw new Error('Não foi possível carregar o Pyodide. Verifique sua conexão com a internet.');
+      }
+    }
+    pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.2/full/' });
+    setRuntimeStatus('Python pronto para executar', 'ready');
+    return pyodide;
+  })();
+  return pyodideLoading;
+}
+
+async function runSnippet(container, snippet){
+  var inputArea = container.querySelector('.input-area');
+  var output = container.querySelector('.output');
+  var outputState = container.querySelector('.output-state');
+  var runButton = container.querySelector('[data-action="run"]');
+
+  var userCode = snippet.codigo;
+  var inputData = inputArea.value.replace(/\r\n/g, '\n');
+  var inputLines = inputData.split('\n').filter(function(l){ return true; });
+  if (inputData === '') inputLines = [];
+
+  runButton.disabled = true;
+  runButton.innerHTML = '⏳&nbsp; Carregando...';
+  output.className = 'output';
+  outputState.textContent = 'carregando python';
+  output.textContent = 'Carregando o interpretador Python no navegador...\nIsso só acontece na primeira vez e pode levar alguns segundos.';
+
+  var outputBuffer = '';
+  try{
+    var py = await ensurePyodide();
+    runButton.innerHTML = '⏳&nbsp; Executando...';
+    outputState.textContent = 'executando';
+    output.textContent = 'Executando...';
+
+    var inputPyList = '[' + inputLines.map(function(l){
+      return "'" + l.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
+    }).join(', ') + ']';
+
+    var fullCode =
+      "import builtins, sys, io\n" +
+      "_inputs = " + inputPyList + "\n" +
+      "_idx = [0]\n" +
+      "def _fake_input(prompt=''):\n" +
+      "    if _idx[0] >= len(_inputs):\n" +
+      "        raise EOFError('Entrada insuficiente: preencha uma linha para cada input()')\n" +
+      "    if prompt:\n" +
+      "        print(prompt, end='')\n" +
+      "    v = _inputs[_idx[0]]\n" +
+      "    _idx[0] += 1\n" +
+      "    print(v)\n" +
+      "    return v\n" +
+      "builtins.input = _fake_input\n" +
+      "\n" +
+      userCode;
+
+    py.setStdout({ batched: function(s){ outputBuffer += s; } });
+    py.setStderr({ batched: function(s){ outputBuffer += s; } });
+
+    await py.runPythonAsync(fullCode);
+
+    output.textContent = outputBuffer || '(O código não produziu saída.)';
+    outputState.textContent = 'concluído';
+    output.classList.toggle('placeholder', !outputBuffer);
+    output.classList.remove('error');
+  } catch(err){
+    var msg = outputBuffer || '';
+    if (msg) msg += '\n';
+    msg += (err && err.message) ? err.message : String(err);
+    output.textContent = msg;
+    output.className = 'output error';
+    outputState.textContent = 'erro';
+  } finally {
+    runButton.disabled = false;
+    runButton.innerHTML = '▶&nbsp; Executar';
+    try { pyodide.setStdout({}); pyodide.setStderr({}); } catch(e){}
+  }
+}
+
+function buildRunnerHTML(snippet, idx){
+  return '' +
+    '<div class="code-shell">' +
+      '<span class="code-label">python</span>' +
+      '<pre><code class="language-python" id="code-' + idx + '"></code></pre>' +
+    '</div>' +
+    '<label class="input-label" for="inputs-' + idx + '"><span>Entradas</span><span style="color:var(--muted); font-weight:500;">uma por linha</span></label>' +
+    '<p class="input-help">Valores de exemplo já preenchidos — clique em Executar, ou edite as entradas.</p>' +
+    '<textarea id="inputs-' + idx + '" class="input-area" spellcheck="false"></textarea>' +
+    '<div class="card-actions">' +
+      '<button type="button" class="run-button" data-action="run">▶&nbsp; Executar</button>' +
+      '<button type="button" class="clear-button" data-action="clear">Limpar saída</button>' +
+    '</div>' +
+    '<div class="output-wrap">' +
+      '<div class="output-label"><span>Saída</span><span class="output-state">aguardando execução</span></div>' +
+      '<pre class="output placeholder">O resultado aparecerá aqui.</pre>' +
+    '</div>';
+}
+
+/* ============================================================
+   HERO — mini demo (Fibonacci) sempre visível na página Início
+   ============================================================ */
+var heroSnippet = {
+  titulo: 'Sequência de Fibonacci',
+  exemplo_entrada: '10',
+  codigo: String.raw`print('''-=-=-=-=--=-=-=-=--=-=-=-=-
+Vamos fazer a sequencia de Fibonacci
+-=-=-=-=--=-=-=-=--=-=-=-=-''')
+
+n = int(input('Quantos termos deseja mostrar? '))
+t1 = 0
+t2 = 1
+print('{} -> {}'.format(t1, t2), end='')
+cont = 3
+while cont <= n:
+    t3 = t1 + t2
+    print(' -> {}'.format(t3), end='')
+    t1 = t2
+    t2 = t3
+    cont += 1
+print('-> FIM')`
+};
+
+(function(){
+  var mount = document.getElementById('heroDemo');
+  mount.innerHTML = buildRunnerHTML(heroSnippet, 'hero');
+  var codeEl = document.getElementById('code-hero');
+  codeEl.textContent = heroSnippet.codigo;
+  hljs.highlightElement(codeEl);
+  mount.querySelector('.input-area').value = heroSnippet.exemplo_entrada;
+  mount.addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    if (btn.dataset.action === 'run') runSnippet(mount, heroSnippet);
+    if (btn.dataset.action === 'clear'){
+      var out = mount.querySelector('.output');
+      out.textContent = 'O resultado aparecerá aqui.';
+      out.className = 'output placeholder';
+      mount.querySelector('.output-state').textContent = 'aguardando execução';
+    }
+  });
+})();
+
+/* ============================================================
+   PROJETOS — lista completa (acordeão)
+   ============================================================ */
+var projetos = [
+  {
+    titulo: 'Fibonacci',
+    descricao: 'Gera os termos iniciais da sequência de Fibonacci com um laço while.',
+    exemplo_entrada: '10',
+    codigo: String.raw`print('''-=-=-=-=--=-=-=-=--=-=-=-=-
+Vamos fazer a sequencia de Fibonacci
+-=-=-=-=--=-=-=-=--=-=-=-=-''')
+
+n = int(input('Quantos termos deseja mostrar? '))
+t1 = 0
+t2 = 1
+print('{} -> {}'.format(t1, t2), end='')
+cont = 3
+while cont <= n:
+    t3 = t1 + t2
+    print(' -> {}'.format(t3), end='')
+    t1 = t2
+    t2 = t3
+    cont += 1
+print('-> FIM')`
+  },
+  {
+    titulo: 'Fatorial',
+    descricao: 'Calcula o fatorial de um número inteiro usando repetição e acumulação.',
+    exemplo_entrada: '5',
+    codigo: String.raw`numero = int(input('Digite um numero inteiro: '))
+
+fatorial = 1
+for valor in range(2, numero + 1):
+    fatorial *= valor
+
+print('{}! = {}'.format(numero, fatorial))`
+  },
+  {
+    titulo: 'Verificador de número primo',
+    descricao: 'Testa se um número é primo verificando seus divisores até a raiz quadrada.',
+    exemplo_entrada: '7',
+    codigo: String.raw`numero = int(input('Digite um numero inteiro: '))
+
+if numero < 2:
+    primo = False
+else:
+    primo = True
+    divisor = 2
+    while divisor * divisor <= numero:
+        if numero % divisor == 0:
+            primo = False
+            break
+        divisor += 1
+
+if primo:
+    print('{} e um numero primo.'.format(numero))
+else:
+    print('{} nao e um numero primo.'.format(numero))`
+  },
+  {
+    titulo: 'Calculadora de IMC',
+    descricao: 'Calcula o Índice de Massa Corporal e mostra uma classificação simples.',
+    exemplo_entrada: '70\n1.75',
+    codigo: String.raw`peso = float(input('Digite seu peso em kg: '))
+altura = float(input('Digite sua altura em metros: '))
+
+imc = peso / (altura ** 2)
+print('Seu IMC e {:.2f}'.format(imc))
+
+if imc < 18.5:
+    print('Classificacao: abaixo do peso')
+elif imc < 25:
+    print('Classificacao: peso normal')
+elif imc < 30:
+    print('Classificacao: sobrepeso')
+else:
+    print('Classificacao: obesidade')`
+  },
+  {
+    titulo: 'Análise de pares e ímpares em lista',
+    descricao: 'Cadastra vários números, ordena a lista e separa os valores em pares e ímpares.',
+    exemplo_entrada: '5\nS\n3\nS\n8\nS\n2\nN',
+    codigo: String.raw`lista = list()
+pares = list()
+impares = list()
+while True:
+    lista.append(int(input('Digite um valor: ')))
+    resp = str(input('Quer continuar? [S/N] ')).strip().upper()[0]
+    if resp == 'N':
+        break
+lista.sort()
+for i, valor in enumerate(lista):
+    if valor % 2 == 0:
+        pares.append(valor)
+    else:
+        impares.append(valor)
+print(f'Pares: {pares}')
+print(f'Impares: {impares}')
+print('Sua lista é {}'.format(lista))`
+  },
+  {
+    titulo: 'Validador de expressão matemática',
+    descricao: 'Verifica se uma expressão tem parênteses abertos e fechados em quantidade igual.',
+    exemplo_entrada: '(2+3)*(4-1)',
+    codigo: String.raw`expr = str(input('Digite a sua expressão matemática: '))
+if expr.count('(') == expr.count(')'):
+    print('A sua expressão é válida')
+else:
+    print('Sua expressão está incorreta')`
+  },
+  {
+    titulo: 'Maior e menor peso cadastrado',
+    descricao: 'Cadastra pessoas com nome e peso, e indica quem tem o maior e o menor peso.',
+    exemplo_entrada: 'Ana\n65.5\nS\nBruno\n80\nN',
+    codigo: String.raw`cont = 0
+maior = menor = 0
+temp = []
+lista = list()
+while True:
+    temp.append(str(input('Digte o nome:   ')))
+    temp.append(float(input('Qual o peso?    ')))
+    if len(lista) == 0:
+        maior = menor = temp[1]
+    else:
+        if temp[1] > maior:
+            maior = temp[1]
+        if temp[1] < menor:
+            menor = temp[1]
+    lista.append(temp[:])
+    temp.clear()
+    cont += 1
+    resp = str(input('Quer continuar? [S/N]    ')).strip().upper()[0]
+    if resp == 'N':
+        break
+print('-='*30)
+print(f'Foram cadastradas {cont} pessoas')
+print(f'O maior peso foi de {maior} Kg')
+for p in lista:
+    if p[1] == maior:
+        print(f'{p[0]} foi o maior peso')
+print(f'O menor peso foi de {menor} Kg')
+for p in lista:
+    if p[1] == menor:
+        print(f'{p[0]} foi o menor peso')`
+  },
+  {
+    titulo: 'Alistamento militar',
+    descricao: 'Calcula quanto falta (ou quanto passou) para o alistamento militar aos 18 anos.',
+    exemplo_entrada: '2008',
+    codigo: String.raw`from datetime import date
+hoje = date.today().year
+
+idade = int(input('Insira o ano que nasceu:  '))
+ano = hoje - idade
+prazo = 17 - ano
+
+if ano == 17:
+    print('Hora de se alistar')
+elif ano < 17:
+    print('Ainda não é hora de se alistar, faltam {} anos'.format(prazo))
+elif ano > 17:
+    prazo = prazo * -1
+    print('Já passou da hora de se alistar, passou {} anos'.format(prazo))`
+  },
+  {
+    titulo: 'Análise de pessoas cadastradas',
+    descricao: 'Cadastra pessoas com nome, idade e sexo, e resume quantos homens, mulheres e maiores de idade foram registrados.',
+    exemplo_entrada: 'Maria\n20\nF\nN',
+    codigo: String.raw`from time import sleep
+sexo = m = f = i = 0
+while True:
+    pessoa = str(input('Nome: ')).strip().upper()
+    idade = int(input('Idade: '))
+    sexo = ' '
+    while sexo not in 'MF':
+        sexo = str(input('Sexo [M/F]: ')).strip().upper()[0]
+    if sexo == 'M':
+        sexo = m
+        m += 1
+    if sexo == 'F' and idade < 20:
+        sexo = f
+        f += 1
+    if idade >= 18:
+        idade = i
+        i += 1
+    print('-'*30)
+    r = ' '
+    while r not in 'SN':
+        r = str(input('Deseja continuar? [S/N]  ')).strip().upper()[0]
+    if r == 'N':
+        sleep(1)
+        print(f'São {i} maiores de 18 anos')
+        print(f'São {m} homens cadastrados')
+        print(f'São {f} mulheres com menos de 20 anos')
+        break
+print('Fim')`
+  },
+  {
+    titulo: 'Análise de um triângulo',
+    descricao: 'Recebe três lados e determina se formam um triângulo — e de qual tipo (equilátero, isósceles ou escaleno).',
+    exemplo_entrada: '3\n4\n5',
+    codigo: String.raw`print("Vamos analisar um triangulo?")
+
+r1 = float(input('Insira o valor do primeiro lado:  '))
+r2 = float(input('Insira o valor do segundo lado:   '))
+r3 = float(input('Insira o valor do terceiro lado:  '))
+
+if r1 < r2 + r3 and r2 < r1 + r3 and r3 < r2 + r1:
+    print('As retas podem formar um triângulo!')
+    if r1 == r2 == r3:
+        print('É um triângulo EQUILÁTERO!')
+    elif r1 == r2 or r2 == r3 or r3 == r1:
+        print('É um triângulo ISÓSCELES!')
+    else:
+        print('É um triangulo ESCALENO!')
+else:
+    print('As retas não podem formar um triangulo!')`
+  },
+  {
+    titulo: 'Análise de valores de compra',
+    descricao: 'Cadastra produtos e preços, soma o total e aponta o produto mais barato e quantos custaram mais de R$ 1000.',
+    exemplo_entrada: 'Caneta\n15\nN',
+    codigo: String.raw`soma = pm = pb = cont = 0
+barato = ' '
+while True:
+    produto = str(input('Produto:  ')).strip().upper()
+    preço = int(input('Preço:   '))
+    cont += 1
+    r = ' '
+    while r not in 'SN':
+        r = str(input('Deseja continuar? [S/N] ')).strip().upper()[0]
+    soma += preço
+    if cont == 1 or preço < pb:
+        pb = preço
+        barato = produto
+    if preço > 1000:
+        pm += 1
+    if r == 'N':
+        print(f'Sua compra deu o total de R$ {soma:.2f}')
+        print(f'Temos {pm} produtos custando mais de R$ 1000,00')
+        print(f'O produto mais barato foi {barato} e custou R$ {pb:.2f} ')
+        break`
+  },
+  {
+    titulo: 'Análise de vários números em lista',
+    descricao: 'Cadastra números em uma lista, ordena de forma decrescente e verifica se o número 5 foi digitado.',
+    exemplo_entrada: '5\nS\n3\nS\n8\nN',
+    codigo: String.raw`lista = list()
+r = 'S'
+cont = 0
+while r == "S":
+    num = int(input('Digite um valor: '))
+    lista.append(num)
+    cont += 1
+    r = str(input('Quer continuar? [S/N] ')).upper()[0]
+    if r == 'N':
+        if 5 in lista:
+            print(f'Contém o número 5 na sua lista')
+        else:
+            print(f'Não contém o número 5 na sua lista')
+        lista.sort(reverse=True)
+        break
+print(f'Os valores na lista são {lista}')
+print(f'Foram digitados {cont} valores na lista')`
+  },
+  {
+    titulo: 'Caixa eletrônico',
+    descricao: 'Simula um caixa eletrônico que calcula quantas cédulas de cada valor são necessárias para um saque.',
+    exemplo_entrada: '387\nN',
+    codigo: String.raw`from time import sleep
+print('-' *30)
+print('{:^30}'.format('BANCO EVOL(UIU)'))
+print('-' *30)
+
+while True:
+    valor = int(input('Qual o valor que você deseja sacar? R$ '))
+    ced = 100
+    total = valor
+    totced = 0
+    while True:
+        if total >= ced:
+            total -= ced
+            totced += 1
+        else:
+            if totced > 0:
+                print(f'Total de {totced} notas de R$ {ced}')
+            if ced == 100:
+                ced = 50
+            elif ced == 50:
+                ced = 20
+            elif ced == 20:
+                ced = 10
+            elif ced == 10:
+                ced = 5
+            elif ced == 5:
+                ced = 1
+            totced = 0
+            if total == 0:
+                break
+    print('-' * 30)
+    r = str(input('Deseja sacar outro valor? [S/N]  ')).strip().upper()[0]
+    print('-' * 30)
+    if r in 'N':
+        break
+print('=-' * 20)
+print('{:^30}'.format('Volte sempre ao BANCO EVOL(UIU)!'))
+print('=-' * 20)
+sleep(4)`
+  },
+  {
+    titulo: 'Calculadora de dois valores',
+    descricao: 'Menu interativo que soma, multiplica ou compara dois valores digitados, com opção de recomeçar ou sair.',
+    exemplo_entrada: '10\n5\n1\n3\n5',
+    codigo: String.raw`from time import sleep
+
+fim = 0
+while fim != 5:
+    valor1 = int(input('Digite o primeiro valor: '))
+    valor2 = int(input('Digite o segundo valor: '))
+    if fim == 4:
+        fim = 5
+    sel = 0
+    while sel != 4:
+        sel = int(input('''
+        =================
+        O que deseja fazer?
+        [1] Somar
+        [2] Multiplicar
+        [3] Maior
+        [4] novos números
+        [5] Sair
+        =================   '''))
+        if sel == 1:
+            soma = valor1 + valor2
+            print(f'A soma de {valor1} com {valor2} é {soma}\n')
+        elif sel == 2:
+            soma = valor1 * valor2
+            print(f'{valor1} x {valor2} = {soma}\n')
+        elif sel == 3:
+            if valor1 > valor2:
+                print(f'O número {valor1} é maior que {valor2}\n')
+            elif valor1 == valor2:
+                print('Os valores são iguais\n')
+            else:
+                print(F'O número {valor2} é maior que {valor1}\n')
+        elif sel == 5:
+            sel = 4
+            fim = 5
+            print('Finalizando...\n')
+        sleep(2)
+sleep(1)
+print('Fim do programa')`
+  },
+  {
+    titulo: 'Jogo: advinhe o número',
+    descricao: 'O computador sorteia um número entre 0 e 10 e você tenta advinhar. Os palpites de exemplo cobrem todas as opções possíveis.',
+    exemplo_entrada: '0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10',
+    codigo: String.raw`import random
+a = random.randint(0, 10)
+r = 0
+palpite = 0
+acertou = False
+print('Estou pensando em um número entre 1 a 10, tente advinhar')
+while a != r:
+    r = int(input('Qual é o número?    '))
+    palpite += 1
+    if a == r:
+        acertou = True
+    else:
+        if a < r:
+            print('Chute um pouco para menos')
+        elif a > r:
+            print('Chute um pouco para mais')
+        else:
+            print('O número está entre 1 e 10')
+print('Acertou com {} tentativas'.format(palpite))`
+  },
+  {
+    titulo: 'Lista de preços',
+    descricao: 'Mostra um cardápio de padaria formatado em colunas. (Corrigido: removida dependência de módulo inexistente e ajustada a formatação do título.)',
+    exemplo_entrada: '',
+    codigo: String.raw`print('-=' * 20)
+titulo = 'Padaria do William'
+print(f'{titulo:^40}')
+print('-=' * 20)
+
+lista = ('café', 'R$ 0,50', 'pão de queijo', 'R$ 0,30', 'pão na chapa', 'R$ 3,50', 'misto quente', 'R$ 8,00', 'suco natural', 'R$ 8,00', 'garrafa de água', 'R$ 2,00')
+for padaria in range(0, len(lista)):
+    if padaria % 2 == 0:
+        print(f'{lista[padaria]:.<33}', end='')
+    else:
+        print(f'{lista[padaria]}', end='\n')
+
+input('''Aperte 'enter' para encerrar
+''')
+print('Até a próxima!')`
+  },
+  {
+    titulo: 'Lista ordenada sem sorted()',
+    descricao: 'Insere 5 números em uma lista mantendo a ordem crescente, sem usar sorted() ou sort().',
+    exemplo_entrada: '5\n2\n9\n1\n7',
+    codigo: String.raw`lista = list()
+for c in range(0, 5):
+    num = int(input('Digite um valor: '))
+    if c == 0 or num > lista[-1]:
+        lista.append(num)
+        print('Valor adicionado no final da lista')
+    else:
+        pos = 0
+        while pos < len(lista):
+            if num < lista[pos]:
+                lista.insert(pos, num)
+                print(f'Valor adicionado na posição {pos +1} da lista')
+                break
+            pos += 1
+print(lista)`
+  },
+  {
+    titulo: 'Maior e menor número aleatório',
+    descricao: 'Sorteia 5 números e mostra o maior e o menor entre eles. (Corrigido: a lógica original nunca calculava o resultado — agora usa max()/min() diretamente.)',
+    exemplo_entrada: '',
+    codigo: String.raw`import random
+
+numeros = [random.randint(1, 10) for _ in range(5)]
+print(f'Os números sorteados foram: {numeros}')
+
+maior = max(numeros)
+menor = min(numeros)
+print(f'O maior número sorteado foi {maior} e o menor foi {menor}')`
+  },
+  {
+    titulo: 'Jogo: par ou ímpar',
+    descricao: 'Você escolhe um número e "par" ou "ímpar"; o computador sorteia outro número e soma os dois. O jogo repete até você perder.',
+    exemplo_entrada: '5\nP\n5\nI\n5\nP\n5\nI\n5\nP',
+    codigo: String.raw`from random import randint
+
+print('=-' *20)
+print('Vamos jogar Par ou Impar?')
+print('=-' *20)
+
+v= 0
+while True:
+    n = int(input('Escolha um valor: '))
+    computador = randint(0, 10)
+    total = n + computador
+    q = ' '
+    while q not in 'PI':
+        q = str(input('Deseja par ou impar? ')).strip().upper()[0]
+    print(f'Você jogou {n} e eu joguei {computador}. O total é {total} ', end='')
+    print('Deu par' if total % 2 == 0 else 'Deu impar')
+    if q == 'P':
+        if total % 2 == 0:
+            v += 1
+            print('Você venceu!')
+        else:
+            print('Você perdeu!')
+            break
+    elif q == 'I':
+        if total % 2 == 1:
+            v += 1
+            print('Você venceu!')
+        else:
+            print('Você perdeu!')
+            break
+    print('Vamos jogar novamente...')
+print(f'Game Over! Você venceu {v} vezes')`
+  },
+  {
+    titulo: 'Progressão aritmética avançada',
+    descricao: 'Gera uma progressão aritmética e permite continuar mostrando mais termos sob demanda.',
+    exemplo_entrada: '2\n3\n0',
+    codigo: String.raw`primeiro = int(input('Qual o primeiro termo? '))
+razao = int(input('Qual a razão? '))
+termo = primeiro
+cont = 1
+mais = 10
+total = 0
+while mais != 0:
+    total += mais
+    while cont <= total:
+        termo += razao
+        cont += 1
+        print('{} - '.format(termo), end=' ')
+    print('PAUSA')
+    mais = int(input('\nQuantos termos deseja a mais deseja mostrar? '))
+print('Fim')`
+  },
+  {
+    titulo: 'Tabuada com interrupção',
+    descricao: 'Mostra a tabuada de um número; digitar um número negativo encerra o programa.',
+    exemplo_entrada: '7\n-1',
+    codigo: String.raw`n = c = 0
+while True:
+    n = int(input('''-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+Digite o número que deseja a tabuada
+ou digite um número negativo para parar:  '''))
+    if n < 0:
+        break
+    for c in range(0, 11):
+        r = c * n
+        print(f'{n} x {c} = {r}\n', end='')
+print('FIM')`
+  }
+];
+
+(function(){
+  var acc = document.getElementById('accordion');
+  acc.innerHTML = projetos.map(function(p, idx){
+    return '' +
+      '<div class="acc-item" data-idx="' + idx + '" open-state="false">' +
+        '<button class="acc-head" data-action="toggle">' +
+          '<span class="acc-index">' + String(idx + 1).padStart(2, '0') + '</span>' +
+          '<span class="acc-title-wrap">' +
+            '<span class="acc-title">' + escapeHtml(p.titulo) + '</span>' +
+            '<span class="acc-desc">' + escapeHtml(p.descricao) + '</span>' +
+          '</span>' +
+          '<svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>' +
+        '</button>' +
+        '<div class="acc-body"><div class="acc-body-inner" data-body="' + idx + '"></div></div>' +
+      '</div>';
+  }).join('');
+
+  var items = acc.querySelectorAll('.acc-item');
+
+  function closeItem(item){
+    item.setAttribute('open-state', 'false');
+    item.querySelector('.acc-body').style.maxHeight = null;
+  }
+  function openItem(item, idx){
+    var body = item.querySelector('.acc-body-inner');
+    if (!body.dataset.built){
+      body.innerHTML = buildRunnerHTML(projetos[idx], idx);
+      var codeEl = document.getElementById('code-' + idx);
+      codeEl.textContent = projetos[idx].codigo;
+      hljs.highlightElement(codeEl);
+      body.querySelector('.input-area').value = projetos[idx].exemplo_entrada;
+      body.dataset.built = '1';
+    }
+    item.setAttribute('open-state', 'true');
+    var wrap = item.querySelector('.acc-body');
+    wrap.style.maxHeight = wrap.scrollHeight + 40 + 'px';
+  }
+
+  acc.addEventListener('click', function(e){
+    var toggleBtn = e.target.closest('[data-action="toggle"]');
+    if (toggleBtn){
+      var item = toggleBtn.closest('.acc-item');
+      var idx = Number(item.dataset.idx);
+      var isOpen = item.getAttribute('open-state') === 'true';
+      items.forEach(function(it){ if (it !== item) closeItem(it); });
+      if (isOpen) closeItem(item); else openItem(item, idx);
+      return;
+    }
+    var runBtn = e.target.closest('[data-action="run"]');
+    var clearBtn = e.target.closest('[data-action="clear"]');
+    if (runBtn){
+      var itemEl = runBtn.closest('.acc-item');
+      var i = Number(itemEl.dataset.idx);
+      runSnippet(itemEl.querySelector('.acc-body-inner'), projetos[i]);
+    }
+    if (clearBtn){
+      var itemEl2 = clearBtn.closest('.acc-item');
+      var body2 = itemEl2.querySelector('.acc-body-inner');
+      var out = body2.querySelector('.output');
+      out.textContent = 'O resultado aparecerá aqui.';
+      out.className = 'output placeholder';
+      body2.querySelector('.output-state').textContent = 'aguardando execução';
+    }
+  });
+})();
+</script>
+</body>
+</html>
