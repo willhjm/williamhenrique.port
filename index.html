@@ -6,6 +6,11 @@
 <meta name="description" content="Portfólio de William Henrique Jesus Melo — estudante de Análise e Desenvolvimento de Sistemas. Projetos em Python 3 executáveis direto no navegador.">
 <title>William Henrique — Portfólio</title>
 
+<!-- Habilita isolamento de origem (COOP/COEP) via service worker, necessário para
+     execução Python interativa em tempo real (SharedArrayBuffer). Sem custom headers
+     no servidor, esse é o jeito padrão de conseguir isso em hospedagens como o GitHub Pages. -->
+<script src="https://cdn.jsdelivr.net/gh/gzuidhof/coi-serviceworker@2.4.0/coi-serviceworker.min.js"></script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -228,6 +233,21 @@
   .output{overflow:auto; min-height:60px; max-height:260px; margin:0; padding:11px; border:1px solid rgba(31,122,82,.28); border-radius:10px; color:#123c26; background:#eefaf4; font-family:var(--font-mono); font-size:.78rem; line-height:1.55; white-space:pre-wrap; word-break:break-word;}
   .output.placeholder{color:#7c9a8d;}
   .output.error{border-color:rgba(194,59,75,.32); color:#7a1626; background:#fdecec;}
+
+  /* ---- Terminal interativo (modo tempo real) ---- */
+  .mode-flag{display:inline-flex; align-items:center; gap:6px; margin:0 0 10px; padding:4px 10px; border-radius:999px; font-size:.68rem; font-weight:700; font-family:var(--font-body); letter-spacing:.02em;}
+  .mode-flag.live{background:var(--accent-2-soft); color:#0f4a30;}
+  .mode-flag.batch{background:var(--surface-2); color:var(--muted);}
+  .mode-flag .dot{width:6px; height:6px; border-radius:50%; background:currentColor;}
+  .terminal-shell{margin-bottom:14px; border:1px solid rgba(31,122,82,.25); border-radius:10px; background:#0c1918; overflow:hidden;}
+  .terminal-output{min-height:70px; max-height:320px; overflow-y:auto; padding:12px; color:#b8f7e8; font-family:var(--font-mono); font-size:.8rem; line-height:1.6; white-space:pre-wrap; word-break:break-word;}
+  .terminal-output .t-error{color:#ffb0ba;}
+  .terminal-output .t-muted{color:#5f8c80;}
+  .terminal-input-row{display:none; align-items:center; gap:8px; padding:9px 12px; border-top:1px solid rgba(184,247,232,.14); background:#0a1513;}
+  .terminal-input-row.active{display:flex;}
+  .terminal-caret{color:#5fe3b8; font-family:var(--font-mono); font-size:.85rem;}
+  .terminal-input{flex:1; background:transparent; border:none; outline:none; color:#eafff6; font-family:var(--font-mono); font-size:.85rem;}
+  .terminal-send{padding:5px 11px; border-radius:7px; border:1px solid rgba(31,122,82,.4); background:rgba(31,122,82,.18); color:#c7f7e4; font-size:.72rem; font-weight:700; cursor:pointer;}
 
   /* ---- Moto Clube ---- */
   .moto-panel{display:flex; flex-direction:column; gap:20px;}
@@ -463,7 +483,7 @@
         <h2>Moto Clube Dragões</h2>
       </div>
       <div class="panel moto-panel">
-        <p font-family:var(--font-body); font-size:1rem;">Sou membro do Moto Clube Dragões e uso parte do meu tempo livre em ações sociais pela região do Alto Tietê. É uma parte da minha rotina que anda junto com o resto — a mesma vontade de contribuir que trago para o trabalho e para os estudos.</p>
+        <p style="color:var(--muted); font-family:var(--font-body); font-size:1rem;">Sou membro do Moto Clube Dragões e uso parte do meu tempo livre em ações sociais pela região do Alto Tietê. É uma parte da minha rotina que anda junto com o resto — a mesma vontade de contribuir que trago para o trabalho e para os estudos.</p>
 
         <div class="cause-grid">
           <div class="cause-card">
@@ -560,10 +580,18 @@
 })();
 
 /* ============================================================
-   MOTOR PYTHON (Pyodide) — compartilhado por todos os cards
+   MOTOR PYTHON (Pyodide) — dois modos de execução:
+   1) INTERATIVO (tempo real): roda num Web Worker com um
+      SharedArrayBuffer, usando Atomics.wait para pausar de
+      verdade o Python em cada input() até a pessoa responder.
+      Exige "cross-origin isolation" (ativada pelo coi-serviceworker
+      no <head>).
+   2) SIMULADO (alternativa): quando o navegador não suporta o
+      modo acima, todas as entradas são pré-preenchidas numa
+      caixa de texto antes de rodar.
    ============================================================ */
-var pyodide = null;
-var pyodideLoading = null;
+var INTERACTIVE_MODE = (typeof SharedArrayBuffer !== 'undefined') && (typeof self !== 'undefined') && self.crossOriginIsolated === true;
+
 var statusText = document.getElementById('runtimeStatus');
 var statusDot = document.getElementById('statusDot');
 
@@ -577,6 +605,16 @@ function escapeHtml(value){
     return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];
   });
 }
+
+function setAllRunButtonsDisabled(disabled, exceptButton){
+  document.querySelectorAll('.run-button').forEach(function(b){
+    if (b !== exceptButton) b.disabled = disabled;
+  });
+}
+
+/* ---------- Modo SIMULADO (fallback, roda na thread principal) ---------- */
+var pyodide = null;
+var pyodideLoading = null;
 
 async function ensurePyodide(){
   if (pyodideLoading) return pyodideLoading;
@@ -599,7 +637,7 @@ async function ensurePyodide(){
   return pyodideLoading;
 }
 
-async function runSnippet(container, snippet){
+async function runBatch(container, snippet){
   var inputArea = container.querySelector('.input-area');
   var output = container.querySelector('.output');
   var outputState = container.querySelector('.output-state');
@@ -607,11 +645,11 @@ async function runSnippet(container, snippet){
 
   var userCode = snippet.codigo;
   var inputData = inputArea.value.replace(/\r\n/g, '\n');
-  var inputLines = inputData.split('\n').filter(function(l){ return true; });
-  if (inputData === '') inputLines = [];
+  var inputLines = inputData === '' ? [] : inputData.split('\n');
 
   runButton.disabled = true;
   runButton.innerHTML = '⏳&nbsp; Carregando...';
+  setAllRunButtonsDisabled(true, runButton);
   output.className = 'output';
   outputState.textContent = 'carregando python';
   output.textContent = 'Carregando o interpretador Python no navegador...\nIsso só acontece na primeira vez e pode levar alguns segundos.';
@@ -628,7 +666,7 @@ async function runSnippet(container, snippet){
     }).join(', ') + ']';
 
     var fullCode =
-      "import builtins, sys, io\n" +
+      "import builtins\n" +
       "_inputs = " + inputPyList + "\n" +
       "_idx = [0]\n" +
       "def _fake_input(prompt=''):\n" +
@@ -644,17 +682,21 @@ async function runSnippet(container, snippet){
       "\n" +
       userCode;
 
-    py.setStdout({ batched: function(s){ outputBuffer += s; } });
-    py.setStderr({ batched: function(s){ outputBuffer += s; } });
+    /* Pyodide entrega a saída em "linhas" (o texto até cada quebra de linha),
+       sem incluir o \n. Por isso recolocamos o \n aqui — sem isso, tudo
+       aparece grudado numa linha só. */
+    py.setStdout({ batched: function(s){ outputBuffer += s + '\n'; } });
+    py.setStderr({ batched: function(s){ outputBuffer += s + '\n'; } });
 
     await py.runPythonAsync(fullCode);
 
-    output.textContent = outputBuffer || '(O código não produziu saída.)';
+    var finalText = outputBuffer.replace(/\n$/, '');
+    output.textContent = finalText || '(O código não produziu saída.)';
     outputState.textContent = 'concluído';
-    output.classList.toggle('placeholder', !outputBuffer);
+    output.classList.toggle('placeholder', !finalText);
     output.classList.remove('error');
   } catch(err){
-    var msg = outputBuffer || '';
+    var msg = outputBuffer.replace(/\n$/, '');
     if (msg) msg += '\n';
     msg += (err && err.message) ? err.message : String(err);
     output.textContent = msg;
@@ -663,16 +705,230 @@ async function runSnippet(container, snippet){
   } finally {
     runButton.disabled = false;
     runButton.innerHTML = '▶&nbsp; Executar';
+    setAllRunButtonsDisabled(false);
     try { pyodide.setStdout({}); pyodide.setStderr({}); } catch(e){}
   }
 }
 
+/* ---------- Modo INTERATIVO (tempo real, roda num Web Worker) ---------- */
+var DATA_BUF_SIZE = 65536;
+var pyWorker = null;
+var workerReadyPromise = null;
+var sharedSync = null;   // Int32Array [0]=flag (1 = dado pronto), [1]=tamanho em bytes
+var sharedData = null;   // SharedArrayBuffer com o texto digitado (UTF-8)
+var activeRun = null;    // card que está executando agora (só um por vez)
+
+var WORKER_SRC = `
+importScripts('https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js');
+var pyodideReadyPromise = loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.2/full/' });
+var _sync, _data;
+
+function jsInput(prompt){
+  postMessage({ type: 'input_request', prompt: prompt });
+  Atomics.wait(_sync, 0, 0);
+  var len = Atomics.load(_sync, 1);
+  var bytes = new Uint8Array(_data, 0, len);
+  var text = new TextDecoder().decode(bytes);
+  Atomics.store(_sync, 0, 0);
+  return text;
+}
+
+self.onmessage = async function(e){
+  var msg = e.data;
+  if (msg.type === 'init'){
+    _sync = new Int32Array(msg.syncBuffer);
+    _data = msg.dataBuffer;
+    await pyodideReadyPromise;
+    postMessage({ type: 'ready' });
+  } else if (msg.type === 'run'){
+    var pyodide = await pyodideReadyPromise;
+    pyodide.setStdout({ batched: function(s){ postMessage({ type: 'stdout', data: s }); } });
+    pyodide.setStderr({ batched: function(s){ postMessage({ type: 'stderr', data: s }); } });
+    pyodide.globals.set('_snippet_code', msg.code);
+    pyodide.globals.set('_js_input', jsInput);
+    try {
+      pyodide.runPython("def _pyinput(prompt=''): return _js_input(prompt)");
+      pyodide.runPython("_ns = {'input': _pyinput}");
+      await pyodide.runPythonAsync("exec(compile(_snippet_code, '<snippet>', 'exec'), _ns)");
+      postMessage({ type: 'done' });
+    } catch(err){
+      postMessage({ type: 'error', message: (err && err.message) ? err.message : String(err) });
+    }
+    try { pyodide.setStdout({}); pyodide.setStderr({}); } catch(e2){}
+  }
+};
+`;
+
+function ensureWorker(){
+  if (workerReadyPromise) return workerReadyPromise;
+  workerReadyPromise = new Promise(function(resolve, reject){
+    setRuntimeStatus('Carregando Python no navegador (1ª vez)...', 'loading');
+    var blob = new Blob([WORKER_SRC], { type: 'application/javascript' });
+    pyWorker = new Worker(URL.createObjectURL(blob));
+
+    var syncSAB = new SharedArrayBuffer(8);
+    sharedSync = new Int32Array(syncSAB);
+    sharedData = new SharedArrayBuffer(DATA_BUF_SIZE);
+
+    pyWorker.onerror = function(err){ reject(err); };
+    pyWorker.onmessage = function(e){
+      var msg = e.data;
+      if (msg.type === 'ready'){
+        setRuntimeStatus('Python pronto (modo interativo)', 'ready');
+        resolve(pyWorker);
+        return;
+      }
+      routeWorkerMessage(msg);
+    };
+    pyWorker.postMessage({ type: 'init', syncBuffer: syncSAB, dataBuffer: sharedData });
+  });
+  return workerReadyPromise;
+}
+
+function routeWorkerMessage(msg){
+  if (!activeRun) return;
+  if (msg.type === 'stdout'){
+    appendTerminalText(activeRun, msg.data + '\n', false);
+  } else if (msg.type === 'stderr'){
+    appendTerminalText(activeRun, msg.data + '\n', true);
+  } else if (msg.type === 'input_request'){
+    showTerminalInput(activeRun, msg.prompt);
+  } else if (msg.type === 'done'){
+    finishRun(activeRun, null);
+  } else if (msg.type === 'error'){
+    finishRun(activeRun, msg.message);
+  }
+}
+
+function appendTerminalText(ctx, text, isError){
+  var out = ctx.container.querySelector('.terminal-output');
+  var span = document.createElement('span');
+  if (isError) span.className = 't-error';
+  span.textContent = text;
+  out.appendChild(span);
+  out.scrollTop = out.scrollHeight;
+}
+
+function showTerminalInput(ctx, prompt){
+  var out = ctx.container.querySelector('.terminal-output');
+  if (prompt){
+    var span = document.createElement('span');
+    span.textContent = prompt;
+    out.appendChild(span);
+    out.scrollTop = out.scrollHeight;
+  }
+  var row = ctx.container.querySelector('.terminal-input-row');
+  var input = ctx.container.querySelector('.terminal-input');
+  row.classList.add('active');
+  input.value = '';
+  input.disabled = false;
+  input.focus();
+}
+
+function submitTerminalInput(ctx){
+  var input = ctx.container.querySelector('.terminal-input');
+  var row = ctx.container.querySelector('.terminal-input-row');
+  var value = input.value;
+  row.classList.remove('active');
+  input.disabled = true;
+  appendTerminalText(ctx, value + '\n', false);
+
+  var enc = new TextEncoder().encode(value);
+  var len = Math.min(enc.length, DATA_BUF_SIZE);
+  new Uint8Array(sharedData, 0, len).set(enc.subarray(0, len));
+  Atomics.store(sharedSync, 1, len);
+  Atomics.store(sharedSync, 0, 1);
+  Atomics.notify(sharedSync, 0);
+}
+
+function finishRun(ctx, errorMessage){
+  var runButton = ctx.container.querySelector('[data-action="run"]');
+  var clearButton = ctx.container.querySelector('[data-action="clear"]');
+  var outputState = ctx.container.querySelector('.output-state');
+  var row = ctx.container.querySelector('.terminal-input-row');
+  row.classList.remove('active');
+  runButton.disabled = false;
+  runButton.innerHTML = '▶&nbsp; Executar';
+  if (clearButton) clearButton.disabled = false;
+  if (errorMessage){
+    appendTerminalText(ctx, errorMessage, true);
+    outputState.textContent = 'erro';
+  } else {
+    outputState.textContent = 'concluído';
+  }
+  activeRun = null;
+  setAllRunButtonsDisabled(false);
+}
+
+async function runInteractive(container, snippet){
+  if (activeRun) return; // já existe uma execução em andamento
+  var out = container.querySelector('.terminal-output');
+  var outputState = container.querySelector('.output-state');
+  var runButton = container.querySelector('[data-action="run"]');
+  var clearButton = container.querySelector('[data-action="clear"]');
+  out.innerHTML = '';
+  outputState.textContent = 'carregando python';
+  runButton.disabled = true;
+  runButton.innerHTML = '⏳&nbsp; Carregando...';
+  if (clearButton) clearButton.disabled = true;
+  setAllRunButtonsDisabled(true, runButton);
+
+  try{
+    await ensureWorker();
+  } catch(err){
+    outputState.textContent = 'erro';
+    var span = document.createElement('span');
+    span.className = 't-error';
+    span.textContent = 'Não foi possível carregar o Python: ' + (err && err.message ? err.message : String(err));
+    out.appendChild(span);
+    runButton.disabled = false;
+    runButton.innerHTML = '▶&nbsp; Executar';
+    if (clearButton) clearButton.disabled = false;
+    setAllRunButtonsDisabled(false);
+    return;
+  }
+
+  runButton.innerHTML = '⏳&nbsp; Executando...';
+  outputState.textContent = 'executando';
+  activeRun = { container: container };
+  pyWorker.postMessage({ type: 'run', code: snippet.codigo });
+}
+
+/* ---------- Ponto de entrada único, usado por todos os cards ---------- */
+async function runSnippet(container, snippet){
+  if (INTERACTIVE_MODE) return runInteractive(container, snippet);
+  return runBatch(container, snippet);
+}
+
 function buildRunnerHTML(snippet, idx){
-  return '' +
+  var codeBlock =
     '<div class="code-shell">' +
       '<span class="code-label">python</span>' +
       '<pre><code class="language-python" id="code-' + idx + '"></code></pre>' +
-    '</div>' +
+    '</div>';
+
+  if (INTERACTIVE_MODE){
+    return codeBlock +
+      '<span class="mode-flag live"><span class="dot"></span>Execução em tempo real</span>' +
+      '<div class="terminal-shell">' +
+        '<div class="terminal-output"></div>' +
+        '<div class="terminal-input-row">' +
+          '<span class="terminal-caret">&gt;</span>' +
+          '<input type="text" class="terminal-input" autocomplete="off" spellcheck="false" placeholder="Digite aqui e pressione Enter" disabled>' +
+          '<button type="button" class="terminal-send" data-action="send-input">Enviar</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card-actions">' +
+        '<button type="button" class="run-button" data-action="run">▶&nbsp; Executar</button>' +
+        '<button type="button" class="clear-button" data-action="clear">Limpar</button>' +
+      '</div>' +
+      '<div class="output-wrap" style="margin-top:6px;">' +
+        '<div class="output-label"><span>Status</span><span class="output-state">aguardando execução</span></div>' +
+      '</div>';
+  }
+
+  return codeBlock +
+    '<span class="mode-flag batch"><span class="dot"></span>Modo simulado — preencha as entradas antes de executar</span>' +
     '<label class="input-label" for="inputs-' + idx + '"><span>Entradas</span><span style="color:var(--muted); font-weight:500;">uma por linha</span></label>' +
     '<p class="input-help">Valores de exemplo já preenchidos — clique em Executar, ou edite as entradas.</p>' +
     '<textarea id="inputs-' + idx + '" class="input-area" spellcheck="false"></textarea>' +
@@ -684,6 +940,15 @@ function buildRunnerHTML(snippet, idx){
       '<div class="output-label"><span>Saída</span><span class="output-state">aguardando execução</span></div>' +
       '<pre class="output placeholder">O resultado aparecerá aqui.</pre>' +
     '</div>';
+}
+
+function wireTerminalEvents(mount){
+  mount.addEventListener('keydown', function(e){
+    if (e.target.classList.contains('terminal-input') && e.key === 'Enter'){
+      e.preventDefault();
+      if (activeRun && activeRun.container === mount) submitTerminalInput(activeRun);
+    }
+  });
 }
 
 /* ============================================================
@@ -716,15 +981,24 @@ print('-> FIM')`
   var codeEl = document.getElementById('code-hero');
   codeEl.textContent = heroSnippet.codigo;
   hljs.highlightElement(codeEl);
-  mount.querySelector('.input-area').value = heroSnippet.exemplo_entrada;
+  var inputArea = mount.querySelector('.input-area');
+  if (inputArea) inputArea.value = heroSnippet.exemplo_entrada;
+  wireTerminalEvents(mount);
   mount.addEventListener('click', function(e){
     var btn = e.target.closest('button');
     if (!btn) return;
     if (btn.dataset.action === 'run') runSnippet(mount, heroSnippet);
+    if (btn.dataset.action === 'send-input'){
+      if (activeRun && activeRun.container === mount) submitTerminalInput(activeRun);
+    }
     if (btn.dataset.action === 'clear'){
       var out = mount.querySelector('.output');
-      out.textContent = 'O resultado aparecerá aqui.';
-      out.className = 'output placeholder';
+      if (out){
+        out.textContent = 'O resultado aparecerá aqui.';
+        out.className = 'output placeholder';
+      }
+      var term = mount.querySelector('.terminal-output');
+      if (term) term.innerHTML = '';
       mount.querySelector('.output-state').textContent = 'aguardando execução';
     }
   });
@@ -1265,7 +1539,9 @@ print('FIM')`
       var codeEl = document.getElementById('code-' + idx);
       codeEl.textContent = projetos[idx].codigo;
       hljs.highlightElement(codeEl);
-      body.querySelector('.input-area').value = projetos[idx].exemplo_entrada;
+      var inputArea = body.querySelector('.input-area');
+      if (inputArea) inputArea.value = projetos[idx].exemplo_entrada;
+      wireTerminalEvents(body);
       body.dataset.built = '1';
     }
     item.setAttribute('open-state', 'true');
@@ -1285,17 +1561,28 @@ print('FIM')`
     }
     var runBtn = e.target.closest('[data-action="run"]');
     var clearBtn = e.target.closest('[data-action="clear"]');
+    var sendBtn = e.target.closest('[data-action="send-input"]');
     if (runBtn){
       var itemEl = runBtn.closest('.acc-item');
       var i = Number(itemEl.dataset.idx);
-      runSnippet(itemEl.querySelector('.acc-body-inner'), projetos[i]);
+      var body3 = itemEl.querySelector('.acc-body-inner');
+      runSnippet(body3, projetos[i]);
+    }
+    if (sendBtn){
+      var itemEl3 = sendBtn.closest('.acc-item');
+      var body4 = itemEl3.querySelector('.acc-body-inner');
+      if (activeRun && activeRun.container === body4) submitTerminalInput(activeRun);
     }
     if (clearBtn){
       var itemEl2 = clearBtn.closest('.acc-item');
       var body2 = itemEl2.querySelector('.acc-body-inner');
       var out = body2.querySelector('.output');
-      out.textContent = 'O resultado aparecerá aqui.';
-      out.className = 'output placeholder';
+      if (out){
+        out.textContent = 'O resultado aparecerá aqui.';
+        out.className = 'output placeholder';
+      }
+      var term = body2.querySelector('.terminal-output');
+      if (term) term.innerHTML = '';
       body2.querySelector('.output-state').textContent = 'aguardando execução';
     }
   });
